@@ -3,9 +3,11 @@
 package internalgrpc
 
 import (
+	"errors"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/vlyagusha/system_stats_daemon/internal/app"
+	"github.com/vlyagusha/system_stats_daemon/internal/config"
 	"github.com/vlyagusha/system_stats_daemon/internal/pipeline"
 	"google.golang.org/grpc"
 	"log"
@@ -18,13 +20,15 @@ type Server struct {
 	host    string
 	port    string
 	grpcSrv *grpc.Server
+	config  config.Config
 }
 
-func NewServer(host string, port string) *Server {
+func NewServer(host string, port string, config config.Config) *Server {
 	server := &Server{
 		grpcSrv: grpc.NewServer(),
 		host:    host,
 		port:    port,
+		config:  config,
 	}
 	RegisterSystemStatsStreamServiceServer(server.grpcSrv, server)
 
@@ -55,7 +59,11 @@ func (s Server) FetchResponse(message *RequestMessage, server SystemStatsStreamS
 	responseTicker := time.NewTicker(time.Duration(message.N) * time.Second)
 	done := make(chan bool)
 	in := make(pipeline.Bi)
-	stages := pipeline.GetStages()
+	stages := pipeline.GetStages(s.config.Stats)
+
+	if len(stages) == 0 {
+		return errors.New("at least one stats kind should be enabled")
+	}
 
 	go func() {
 		for {

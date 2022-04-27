@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"github.com/vlyagusha/system_stats_daemon/internal/config"
 	internalgrpc "github.com/vlyagusha/system_stats_daemon/internal/server/grpc"
 	"log"
 	"os/signal"
@@ -18,10 +19,15 @@ func init() {
 func main() {
 	flag.Parse()
 
+	cfg, err := config.LoadConfig("configs/config.yaml")
+	if err != nil {
+		log.Fatalf("failed to load config: %s", err)
+	}
+
 	ctx, cancel := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 	defer cancel()
 
-	grpcServer := internalgrpc.NewServer("", port)
+	grpcServer := internalgrpc.NewServer("", port, *cfg)
 
 	go func() {
 		if err := grpcServer.Start(); err != nil {

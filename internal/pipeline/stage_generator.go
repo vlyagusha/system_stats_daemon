@@ -2,48 +2,63 @@ package pipeline
 
 import (
 	"github.com/vlyagusha/system_stats_daemon/internal/app"
+	"github.com/vlyagusha/system_stats_daemon/internal/config"
 	"github.com/vlyagusha/system_stats_daemon/internal/utils/cpu"
 	"github.com/vlyagusha/system_stats_daemon/internal/utils/disk"
 	"github.com/vlyagusha/system_stats_daemon/internal/utils/load"
 	"log"
 )
 
-func GetStages() []Stage {
-	return []Stage{
-		stageGenerator(
+func GetStages(statsConfig config.StatsConfig) []Stage {
+	var stages []Stage
+
+	if statsConfig.LoadAvg {
+		stages = append(stages, stageGenerator(
 			"Load Average Stage",
 			func(stat app.SystemStats) app.SystemStats {
 				loadAvg, err := load.Get()
 				if err != nil {
 					log.Fatalf("Failed to get load average: %s", err)
 				}
-				stat.Load = *loadAvg
+				stat.Load = loadAvg
 
 				return stat
 			}),
-		stageGenerator(
+		)
+	}
+
+	if statsConfig.Cpu {
+		stages = append(stages, stageGenerator(
 			"CPU stage",
 			func(stat app.SystemStats) app.SystemStats {
 				cpuStat, err := cpu.Get()
 				if err != nil {
 					log.Fatalf("Failed to get CPU usage: %s", err)
 				}
-				stat.CPU = *cpuStat
+				stat.CPU = cpuStat
 
 				return stat
 			}),
-		stageGenerator(
+		)
+	}
+
+	if statsConfig.Disk {
+		stages = append(stages, stageGenerator(
 			"Disk stage",
 			func(stat app.SystemStats) app.SystemStats {
 				diskStats, err := disk.Get()
 				if err != nil {
 					log.Fatalf("Failed to get disk stats: %s", err)
 				}
-				stat.Disk = *diskStats
+				stat.Disk = diskStats
 
 				return stat
 			}),
+		)
 	}
+	log.Print(stages)
+
+	return stages
 }
 
 func stageGenerator(_ string, f func(s app.SystemStats) app.SystemStats) Stage {

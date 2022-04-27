@@ -10,17 +10,24 @@ import (
 type SystemStats struct {
 	ID          uuid.UUID
 	CollectedAt time.Time
-	Load        LoadStats
-	CPU         CpuStats
-	Disk        DiskStats
+	Load        *LoadStats
+	CPU         *CpuStats
+	Disk        *DiskStats
 }
 
 func (s SystemStats) String() string {
 	builder := strings.Builder{}
 	builder.WriteString(fmt.Sprintf("ID: %s ", s.ID))
-	builder.WriteString(fmt.Sprintf("Load average: %f ", s.Load))
-	builder.WriteString(fmt.Sprintf("CPU usage: %s ", s.CPU))
-	builder.WriteString(fmt.Sprintf("Disk: %s ", s.Disk))
+	builder.WriteString(fmt.Sprintf("Collected at: %s ", s.CollectedAt))
+	if s.Load != nil {
+		builder.WriteString(fmt.Sprintf("Load average: %s ", s.Load))
+	}
+	if s.CPU != nil {
+		builder.WriteString(fmt.Sprintf("CPU usage: %s ", s.CPU))
+	}
+	if s.Disk != nil {
+		builder.WriteString(fmt.Sprintf("Disk: %s ", s.Disk))
+	}
 
 	return builder.String()
 }
