@@ -4,6 +4,7 @@
 package load
 
 import (
+	"github.com/vlyagusha/system_stats_daemon/internal/app"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -12,7 +13,7 @@ import (
 	"syscall"
 )
 
-func Avg() (float64, error) {
+func Get() (*app.LoadStats, error) {
 	stat, err := fileAvg()
 	if err != nil {
 		stat, err = sysInfoAvg()
@@ -20,28 +21,46 @@ func Avg() (float64, error) {
 	return stat, err
 }
 
-func sysInfoAvg() (float64, error) {
+func sysInfoAvg() (*app.LoadStats, error) {
 	var info syscall.Sysinfo_t
 	err := syscall.Sysinfo(&info)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
-	return float64(info.Loads[0]) / float64(1<<16), nil
+	return &app.LoadStats{
+		Load1:  float64(info.Loads[0]) / float64(1<<16),
+		Load5:  float64(info.Loads[1]) / float64(1<<16),
+		Load15: float64(info.Loads[2]) / float64(1<<16),
+	}, nil
 }
 
-func fileAvg() (float64, error) {
+func fileAvg() (*app.LoadStats, error) {
 	values, err := readLoadAvgFromFile()
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
-	load, err := strconv.ParseFloat(values[0], 64)
+	load1, err := strconv.ParseFloat(values[0], 64)
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 
-	return load, nil
+	load5, err := strconv.ParseFloat(values[1], 64)
+	if err != nil {
+		return nil, err
+	}
+
+	load15, err := strconv.ParseFloat(values[2], 64)
+	if err != nil {
+		return nil, err
+	}
+
+	return &app.LoadStats{
+		Load1:  load1,
+		Load5:  load5,
+		Load15: load15,
+	}, nil
 }
 
 func readLoadAvgFromFile() ([]string, error) {

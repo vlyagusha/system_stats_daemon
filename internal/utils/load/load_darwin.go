@@ -4,11 +4,12 @@
 package load
 
 import (
+	"github.com/vlyagusha/system_stats_daemon/internal/app"
 	"golang.org/x/sys/unix"
 	"unsafe"
 )
 
-func Avg() (float64, error) {
+func Get() (*app.LoadStats, error) {
 	type loadavg struct {
 		load  [3]uint32
 		scale int
@@ -16,10 +17,14 @@ func Avg() (float64, error) {
 
 	b, err := unix.SysctlRaw("vm.loadavg")
 	if err != nil {
-		return 0, err
+		return nil, err
 	}
 	load := *(*loadavg)(unsafe.Pointer(&b[0]))
 	scale := float64(load.scale)
 
-	return float64(load.load[0]) / scale, nil
+	return &app.LoadStats{
+		Load1:  float64(load.load[0]) / scale,
+		Load5:  float64(load.load[1]) / scale,
+		Load15: float64(load.load[2]) / scale,
+	}, nil
 }

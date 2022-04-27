@@ -2,6 +2,8 @@ package pipeline
 
 import (
 	"github.com/vlyagusha/system_stats_daemon/internal/app"
+	"github.com/vlyagusha/system_stats_daemon/internal/utils/cpu"
+	"github.com/vlyagusha/system_stats_daemon/internal/utils/disk"
 	"github.com/vlyagusha/system_stats_daemon/internal/utils/load"
 	"log"
 )
@@ -11,12 +13,34 @@ func GetStages() []Stage {
 		stageGenerator(
 			"Load Average Stage",
 			func(stat app.SystemStats) app.SystemStats {
-				l, err := load.Avg()
+				loadAvg, err := load.Get()
 				if err != nil {
 					log.Fatalf("Failed to get load average: %s", err)
 				}
+				stat.Load = *loadAvg
 
-				stat.Main.Load = l
+				return stat
+			}),
+		stageGenerator(
+			"CPU stage",
+			func(stat app.SystemStats) app.SystemStats {
+				cpuStat, err := cpu.Get()
+				if err != nil {
+					log.Fatalf("Failed to get CPU usage: %s", err)
+				}
+				stat.CPU = *cpuStat
+
+				return stat
+			}),
+		stageGenerator(
+			"Disk stage",
+			func(stat app.SystemStats) app.SystemStats {
+				diskStats, err := disk.Get()
+				if err != nil {
+					log.Fatalf("Failed to get disk stats: %s", err)
+				}
+				stat.Disk = *diskStats
+
 				return stat
 			}),
 	}
