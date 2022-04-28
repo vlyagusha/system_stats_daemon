@@ -35,11 +35,7 @@ func main() {
 		}
 	}()
 
-	go func() {
-		<-ctx.Done()
-		log.Printf("graceful shutting down")
-		grpcServer.Stop()
-	}()
-
 	<-ctx.Done()
+	log.Printf("graceful shutting down")
+	grpcServer.Stop()
 }

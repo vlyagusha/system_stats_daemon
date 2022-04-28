@@ -15,4 +15,26 @@ message RequestMessage {
 
 message ResponseMessage {
   string title = 1;
+  string collectedAt = 2;
+  LoadMessage load = 3;
+  CPUMessage cpu = 4;
+  DiskMessage disk = 5;
+}
+
+message LoadMessage {
+  float load1 = 1;
+  float load5 = 2;
+  float load15 = 3;
+}
+
+message CPUMessage {
+  int32 user = 1;
+  int32 system = 2;
+  int32 idle = 3;
+}
+
+message DiskMessage {
+  float kbt = 1;
+  int32 tps = 2;
+  float mbs = 3;
 }

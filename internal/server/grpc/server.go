@@ -87,7 +87,23 @@ func (s Server) FetchResponse(message *RequestMessage, server SystemStatsStreamS
 			log.Printf("Stat %s", stat)
 
 			resp := ResponseMessage{
-				Title: fmt.Sprintf("Request for N = %d and M = %d: %s", message.N, message.M, stat),
+				Title:       fmt.Sprintf("Request for N = %d and M = %d: %s", message.N, message.M, stat),
+				CollectedAt: stat.CollectedAt.String(),
+				Load: &LoadMessage{
+					Load1:  float32(stat.Load.Load1),
+					Load5:  float32(stat.Load.Load5),
+					Load15: float32(stat.Load.Load15),
+				},
+				Cpu: &CPUMessage{
+					User:   int32(stat.CPU.User),
+					System: int32(stat.CPU.System),
+					Idle:   int32(stat.CPU.Idle),
+				},
+				Disk: &DiskMessage{
+					Kbt: float32(stat.Disk.KBt),
+					Tps: int32(stat.Disk.TPS),
+					Mbs: float32(stat.Disk.MBs),
+				},
 			}
 
 			if err := server.Send(&resp); err != nil {
