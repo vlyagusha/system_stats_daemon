@@ -7,6 +7,27 @@ import (
 	"time"
 )
 
+type SystemStatsAvg struct {
+	Load1  float64
+	Load5  float64
+	Load15 float64
+	User   float64
+	System float64
+	Idle   float64
+	KBt    float64
+	TPS    float64
+	MBs    float64
+}
+
+func (s SystemStatsAvg) String() string {
+	builder := strings.Builder{}
+	builder.WriteString(fmt.Sprintf("Load average: %f %f %f ", s.Load1, s.Load5, s.Load15))
+	builder.WriteString(fmt.Sprintf("CPU usage: %f %f %f ", s.User, s.System, s.Idle))
+	builder.WriteString(fmt.Sprintf("Disk: %f %f %f ", s.KBt, s.TPS, s.MBs))
+
+	return builder.String()
+}
+
 type SystemStats struct {
 	ID          uuid.UUID
 	CollectedAt time.Time

@@ -18,7 +18,7 @@ func GetStages(statsConfig config.StatsConfig) []Stage {
 			func(stat app.SystemStats) app.SystemStats {
 				loadAvg, err := load.Get()
 				if err != nil {
-					log.Fatalf("Failed to get load average: %s", err)
+					log.Fatalf("failed to get load average: %s", err)
 				}
 				stat.Load = loadAvg
 
@@ -33,7 +33,7 @@ func GetStages(statsConfig config.StatsConfig) []Stage {
 			func(stat app.SystemStats) app.SystemStats {
 				cpuStat, err := cpu.Get()
 				if err != nil {
-					log.Fatalf("Failed to get CPU usage: %s", err)
+					log.Fatalf("failed to get CPU usage: %s", err)
 				}
 				stat.CPU = cpuStat
 
@@ -48,7 +48,7 @@ func GetStages(statsConfig config.StatsConfig) []Stage {
 			func(stat app.SystemStats) app.SystemStats {
 				diskStats, err := disk.Get()
 				if err != nil {
-					log.Fatalf("Failed to get disk stats: %s", err)
+					log.Fatalf("failed to get disk stats: %s", err)
 				}
 				stat.Disk = diskStats
 
@@ -56,7 +56,6 @@ func GetStages(statsConfig config.StatsConfig) []Stage {
 			}),
 		)
 	}
-	log.Print(stages)
 
 	return stages
 }

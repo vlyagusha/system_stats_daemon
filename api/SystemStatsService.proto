@@ -28,13 +28,13 @@ message LoadMessage {
 }
 
 message CPUMessage {
-  int32 user = 1;
-  int32 system = 2;
-  int32 idle = 3;
+  float user = 1;
+  float system = 2;
+  float idle = 3;
 }
 
 message DiskMessage {
   float kbt = 1;
-  int32 tps = 2;
+  float tps = 2;
   float mbs = 3;
 }

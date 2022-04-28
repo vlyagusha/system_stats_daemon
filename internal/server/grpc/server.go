@@ -3,12 +3,12 @@
 package internalgrpc
 
 import (
-	"errors"
 	"fmt"
 	"github.com/google/uuid"
 	"github.com/vlyagusha/system_stats_daemon/internal/app"
 	"github.com/vlyagusha/system_stats_daemon/internal/config"
 	"github.com/vlyagusha/system_stats_daemon/internal/pipeline"
+	memorystorage "github.com/vlyagusha/system_stats_daemon/internal/storage/memory"
 	"google.golang.org/grpc"
 	"log"
 	"net"
@@ -56,65 +56,95 @@ func (s *Server) Stop() {
 func (s Server) FetchResponse(message *RequestMessage, server SystemStatsStreamService_FetchResponseServer) error {
 	log.Printf("fetch response for N = %d and M = %d", message.N, message.M)
 
-	responseTicker := time.NewTicker(time.Duration(message.N) * time.Second)
-	done := make(chan bool)
 	in := make(pipeline.Bi)
-	stages := pipeline.GetStages(s.config.Stats)
+	done := make(chan bool)
+	collectDone := make(chan bool)
 
-	if len(stages) == 0 {
-		return errors.New("at least one stats kind should be enabled")
-	}
-
+	collectTicker := time.NewTicker(1 * time.Second)
 	go func() {
 		for {
 			select {
-			case <-responseTicker.C:
+			case <-collectTicker.C:
 				stat := app.SystemStats{
 					ID:          uuid.New(),
 					CollectedAt: time.Now(),
 				}
 				in <- stat
+				log.Printf("pushed stat: %s", stat)
+			case <-collectDone:
+				return
+			}
+		}
+	}()
+
+	stages := pipeline.GetStages(s.config.Stats)
+	storage := memorystorage.New()
+	go func(storage *memorystorage.Storage) {
+		for stat := range pipeline.ExecutePipeline(in, nil, stages...) {
+			err := storage.Create(stat)
+			log.Printf("stored stat: %s", stat)
+			if err != nil {
+				log.Printf("error while collect stats: %s", err)
+				return
+			}
+		}
+	}(storage)
+
+	responseTicker := time.NewTicker(time.Duration(message.N) * time.Second)
+	go func(storage *memorystorage.Storage) {
+		if message.M > message.N {
+			log.Print("sleep")
+			time.Sleep(time.Duration(message.M-message.N) * time.Second)
+		}
+
+		for {
+			select {
+			case <-responseTicker.C:
+				stat, err := storage.FindAvg(message.M)
+				if err != nil {
+					log.Printf("error while getting avg stats: %s", err)
+					collectDone <- true
+					done <- true
+					return
+				}
+
+				log.Printf("got avg stat %s", stat)
+				resp := ResponseMessage{
+					Title:       fmt.Sprintf("Request for N = %d and M = %d: %s", message.N, message.M, stat),
+					CollectedAt: time.Now().String(),
+					Load: &LoadMessage{
+						Load1:  float32(stat.Load1),
+						Load5:  float32(stat.Load5),
+						Load15: float32(stat.Load15),
+					},
+					Cpu: &CPUMessage{
+						User:   float32(stat.User),
+						System: float32(stat.System),
+						Idle:   float32(stat.Idle),
+					},
+					Disk: &DiskMessage{
+						Kbt: float32(stat.KBt),
+						Tps: float32(stat.TPS),
+						Mbs: float32(stat.MBs),
+					},
+				}
+
+				if err := server.Send(&resp); err != nil {
+					log.Printf("send error %s", err)
+					collectDone <- true
+					done <- true
+					return
+				}
+				log.Printf("finishing request number")
+
 			case <-done:
 				log.Printf("finished fetch response for N = %d and M = %d", message.N, message.M)
-
 				return
 			}
 		}
-	}()
+	}(storage)
 
-	go func() {
-		for stat := range pipeline.ExecutePipeline(in, nil, stages...) {
-			log.Printf("Stat %s", stat)
-
-			resp := ResponseMessage{
-				Title:       fmt.Sprintf("Request for N = %d and M = %d: %s", message.N, message.M, stat),
-				CollectedAt: stat.CollectedAt.String(),
-				Load: &LoadMessage{
-					Load1:  float32(stat.Load.Load1),
-					Load5:  float32(stat.Load.Load5),
-					Load15: float32(stat.Load.Load15),
-				},
-				Cpu: &CPUMessage{
-					User:   int32(stat.CPU.User),
-					System: int32(stat.CPU.System),
-					Idle:   int32(stat.CPU.Idle),
-				},
-				Disk: &DiskMessage{
-					Kbt: float32(stat.Disk.KBt),
-					Tps: int32(stat.Disk.TPS),
-					Mbs: float32(stat.Disk.MBs),
-				},
-			}
-
-			if err := server.Send(&resp); err != nil {
-				log.Printf("send error %s", err)
-				done <- true
-				return
-			}
-
-			log.Printf("finishing request number")
-		}
-	}()
+	storage = nil
 
 	<-done
 	log.Printf("finished fetch response for N = %d and M = %d", message.N, message.M)

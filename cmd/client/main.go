@@ -41,6 +41,8 @@ func main() {
 		log.Fatalf("open stream error: %s", err)
 	}
 
+	log.Print("started fetching")
+
 	done := make(chan bool)
 	go func() {
 		for {
@@ -52,7 +54,7 @@ func main() {
 			if err != nil {
 				log.Fatalf("can not receive: %s", err)
 			}
-			log.Printf("Response received: %s", resp.Title)
+			log.Printf("response received: %s", resp.Title)
 		}
 	}()
 
