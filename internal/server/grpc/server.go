@@ -75,35 +75,33 @@ func (s Server) FetchResponse(message *RequestMessage, server SystemStatsStreamS
 				}
 				in <- stat
 			case <-done:
+				log.Printf("finished fetch response for N = %d and M = %d", message.N, message.M)
+
 				return
 			}
 		}
 	}()
 
 	go func() {
-		for {
-			select {
-			default:
-				for stat := range pipeline.ExecutePipeline(in, nil, stages...) {
-					log.Printf("Stat %s", stat)
+		for stat := range pipeline.ExecutePipeline(in, nil, stages...) {
+			log.Printf("Stat %s", stat)
 
-					resp := ResponseMessage{
-						Title: fmt.Sprintf("Request for N = %d and M = %d: %s", message.N, message.M, stat),
-					}
-
-					if err := server.Send(&resp); err != nil {
-						log.Printf("send error %s", err)
-						done <- true
-						return
-					}
-
-					log.Printf("finishing request number")
-				}
+			resp := ResponseMessage{
+				Title: fmt.Sprintf("Request for N = %d and M = %d: %s", message.N, message.M, stat),
 			}
+
+			if err := server.Send(&resp); err != nil {
+				log.Printf("send error %s", err)
+				done <- true
+				return
+			}
+
+			log.Printf("finishing request number")
 		}
 	}()
 
 	<-done
+	log.Printf("finished fetch response for N = %d and M = %d", message.N, message.M)
 
 	return nil
 }
