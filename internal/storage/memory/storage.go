@@ -57,8 +57,8 @@ func (m *Storage) FindAll() ([]app.SystemStats, error) {
 }
 
 func (m *Storage) FindAvg(duration time.Duration) (*app.SystemStatsAvg, error) {
-	m.mu.RLock()
-	defer m.mu.RUnlock()
+	m.mu.Lock()
+	defer m.mu.Unlock()
 
 	now := time.Now()
 	var load1, load5, load15, user, system, idle, kbt, tps, mbs float64
@@ -73,6 +73,8 @@ func (m *Storage) FindAvg(duration time.Duration) (*app.SystemStatsAvg, error) {
 			kbt += systemStats.Disk.KBt
 			tps += float64(systemStats.Disk.TPS)
 			mbs += systemStats.Disk.MBs
+		} else {
+			delete(m.stats, systemStats.ID)
 		}
 	}
 

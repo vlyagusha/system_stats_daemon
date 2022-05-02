@@ -185,6 +185,73 @@ func TestStorage(t *testing.T) { //nolint:funlen,gocognit,nolintlint
 		require.Equal(t, math.Round(avg.TPS*100)/100, 11.67)
 		require.Equal(t, math.Round(avg.MBs*100)/100, 28.0)
 	})
+
+	t.Run("test clear storage", func(t *testing.T) {
+		stats := []app.SystemStats{
+			{
+				ID:          parseUUID(t, "4927aa58-a175-429a-a125-c04765597150"),
+				CollectedAt: time.Now().Add(-10 * time.Second),
+				Load: &app.LoadStats{
+					Load1:  1,
+					Load5:  5,
+					Load15: 15,
+				},
+				CPU: &app.CPUStats{
+					User:   10,
+					System: 20,
+					Idle:   70,
+				},
+				Disk: &app.DiskStats{
+					KBt: 5,
+					TPS: 10,
+					MBs: 7,
+				},
+			},
+			{
+				ID:          parseUUID(t, "4927aa58-a175-429a-a125-c04765597151"),
+				CollectedAt: time.Now().Add(-30 * time.Second),
+				Load: &app.LoadStats{
+					Load1:  2,
+					Load5:  10,
+					Load15: 30,
+				},
+				CPU: &app.CPUStats{
+					User:   15,
+					System: 15,
+					Idle:   70,
+				},
+				Disk: &app.DiskStats{
+					KBt: 50,
+					TPS: 20,
+					MBs: 7,
+				},
+			},
+		}
+
+		for _, e := range stats {
+			err := store.Create(e)
+			if err != nil {
+				t.FailNow()
+				return
+			}
+		}
+
+		require.Len(t, store.stats, 2)
+
+		avg, err := store.FindAvg(20 * time.Second)
+		require.Nil(t, err)
+		require.Equal(t, math.Round(avg.Load1*100)/100, 1.0)
+		require.Equal(t, math.Round(avg.Load5*100)/100, 5.0)
+		require.Equal(t, math.Round(avg.Load15*100)/100, 15.0)
+		require.Equal(t, math.Round(avg.User*100)/100, 10.00)
+		require.Equal(t, math.Round(avg.System*100)/100, 20.0)
+		require.Equal(t, math.Round(avg.Idle*100)/100, 70.0)
+		require.Equal(t, math.Round(avg.KBt*100)/100, 5.0)
+		require.Equal(t, math.Round(avg.TPS*100)/100, 10.0)
+		require.Equal(t, math.Round(avg.MBs*100)/100, 7.0)
+
+		require.Len(t, store.stats, 1)
+	})
 }
 
 func parseUUID(t *testing.T, str string) uuid.UUID {
@@ -194,13 +261,4 @@ func parseUUID(t *testing.T, str string) uuid.UUID {
 		t.Errorf("failed to parse UUID: %s", err)
 	}
 	return id
-}
-
-func parseDate(t *testing.T, str string) time.Time {
-	t.Helper()
-	dt, err := time.Parse(time.RFC3339, str)
-	if err != nil {
-		t.Errorf("failed to parse date: %s", err)
-	}
-	return dt
 }
