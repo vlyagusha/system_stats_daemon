@@ -9,6 +9,6 @@ import (
 	"runtime"
 )
 
-func Get() (*app.CpuStats, error) {
+func Get() (*app.CPUStats, error) {
 	return nil, fmt.Errorf("cpu statistics not implemented for: %s", runtime.GOOS)
 }

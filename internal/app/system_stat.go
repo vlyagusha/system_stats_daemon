@@ -2,9 +2,10 @@ package app
 
 import (
 	"fmt"
-	"github.com/google/uuid"
 	"strings"
 	"time"
+
+	"github.com/google/uuid"
 )
 
 type SystemStatsAvg struct {
@@ -32,7 +33,7 @@ type SystemStats struct {
 	ID          uuid.UUID
 	CollectedAt time.Time
 	Load        *LoadStats
-	CPU         *CpuStats
+	CPU         *CPUStats
 	Disk        *DiskStats
 }
 
@@ -63,13 +64,13 @@ func (l LoadStats) String() string {
 	return fmt.Sprintf("1m: %2f 5m: %2f 15m: %2f", l.Load1, l.Load5, l.Load15)
 }
 
-type CpuStats struct {
+type CPUStats struct {
 	User   int
 	System int
 	Idle   int
 }
 
-func (c CpuStats) String() string {
+func (c CPUStats) String() string {
 	return fmt.Sprintf("User: %d System: %d Idle: %d", c.User, c.System, c.Idle)
 }
 

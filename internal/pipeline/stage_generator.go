@@ -1,12 +1,13 @@
 package pipeline
 
 import (
+	"log"
+
 	"github.com/vlyagusha/system_stats_daemon/internal/app"
 	"github.com/vlyagusha/system_stats_daemon/internal/config"
 	"github.com/vlyagusha/system_stats_daemon/internal/utils/cpu"
 	"github.com/vlyagusha/system_stats_daemon/internal/utils/disk"
 	"github.com/vlyagusha/system_stats_daemon/internal/utils/load"
-	"log"
 )
 
 func GetStages(statsConfig config.StatsConfig) []Stage {
@@ -27,7 +28,7 @@ func GetStages(statsConfig config.StatsConfig) []Stage {
 		)
 	}
 
-	if statsConfig.Cpu {
+	if statsConfig.CPU {
 		stages = append(stages, stageGenerator(
 			"CPU stage",
 			func(stat app.SystemStats) app.SystemStats {

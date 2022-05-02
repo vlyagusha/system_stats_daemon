@@ -4,10 +4,11 @@
 package disk
 
 import (
-	"github.com/vlyagusha/system_stats_daemon/internal/app"
 	"os/exec"
 	"strconv"
 	"strings"
+
+	"github.com/vlyagusha/system_stats_daemon/internal/app"
 )
 
 func Get() (*app.DiskStats, error) {

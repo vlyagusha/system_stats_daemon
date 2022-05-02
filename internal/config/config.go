@@ -13,7 +13,7 @@ type Config struct {
 
 type StatsConfig struct {
 	LoadAvg bool
-	Cpu     bool
+	CPU     bool
 	Disk    bool
 	NetTop  bool
 	NetStat bool

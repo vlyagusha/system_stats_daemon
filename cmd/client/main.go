@@ -2,17 +2,21 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
-	internalgrpc "github.com/vlyagusha/system_stats_daemon/internal/server/grpc"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 	"io"
 	"log"
 	"net"
+
+	internalgrpc "github.com/vlyagusha/system_stats_daemon/internal/server/grpc"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
-var port string
-var n, m int
+var (
+	port string
+	n, m int
+)
 
 func init() {
 	flag.StringVar(&port, "port", "50005", "port")
@@ -38,7 +42,8 @@ func main() {
 
 	stream, err := client.FetchResponse(context.Background(), in)
 	if err != nil {
-		log.Fatalf("open stream error: %s", err)
+		log.Printf("open stream error: %s", err)
+		return
 	}
 
 	log.Print("started fetching")
@@ -47,7 +52,7 @@ func main() {
 	go func() {
 		for {
 			resp, err := stream.Recv()
-			if err == io.EOF {
+			if errors.Is(err, io.EOF) {
 				done <- true
 				return
 			}

@@ -1,11 +1,12 @@
 package memorystorage
 
 import (
+	"sync"
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/vlyagusha/system_stats_daemon/internal/app"
 	"github.com/vlyagusha/system_stats_daemon/internal/storage"
-	"sync"
-	"time"
 )
 
 type Storage struct {
@@ -47,7 +48,7 @@ func (m *Storage) FindAll() ([]app.SystemStats, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
-	stats := make([]app.SystemStats, len(m.stats))
+	stats := make([]app.SystemStats, 0, len(m.stats))
 	for _, systemStats := range m.stats {
 		stats = append(stats, systemStats)
 	}
@@ -55,23 +56,23 @@ func (m *Storage) FindAll() ([]app.SystemStats, error) {
 	return stats, nil
 }
 
-func (m *Storage) FindAvg(duration int32) (*app.SystemStatsAvg, error) {
+func (m *Storage) FindAvg(duration time.Duration) (*app.SystemStatsAvg, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
 	now := time.Now()
 	var load1, load5, load15, user, system, idle, kbt, tps, mbs float64
 	for _, systemStats := range m.stats {
-		if now.Sub(systemStats.CollectedAt) <= (time.Duration(duration) * time.Second) {
-			load1 = load1 + systemStats.Load.Load1
-			load5 = load5 + systemStats.Load.Load5
-			load15 = load15 + systemStats.Load.Load15
-			user = user + float64(systemStats.CPU.User)
-			system = system + float64(systemStats.CPU.System)
-			idle = idle + float64(systemStats.CPU.Idle)
-			kbt = kbt + systemStats.Disk.KBt
-			tps = tps + float64(systemStats.Disk.TPS)
-			mbs = mbs + systemStats.Disk.MBs
+		if now.Sub(systemStats.CollectedAt) <= duration {
+			load1 += systemStats.Load.Load1
+			load5 += systemStats.Load.Load5
+			load15 += systemStats.Load.Load15
+			user += float64(systemStats.CPU.User)
+			system += float64(systemStats.CPU.System)
+			idle += float64(systemStats.CPU.Idle)
+			kbt += systemStats.Disk.KBt
+			tps += float64(systemStats.Disk.TPS)
+			mbs += systemStats.Disk.MBs
 		}
 	}
 

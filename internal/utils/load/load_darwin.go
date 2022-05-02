@@ -4,9 +4,10 @@
 package load
 
 import (
+	"unsafe"
+
 	"github.com/vlyagusha/system_stats_daemon/internal/app"
 	"golang.org/x/sys/unix"
-	"unsafe"
 )
 
 func Get() (*app.LoadStats, error) {

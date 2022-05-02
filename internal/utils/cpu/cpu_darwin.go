@@ -4,13 +4,14 @@
 package cpu
 
 import (
-	"github.com/vlyagusha/system_stats_daemon/internal/app"
 	"os/exec"
 	"strconv"
 	"strings"
+
+	"github.com/vlyagusha/system_stats_daemon/internal/app"
 )
 
-func Get() (*app.CpuStats, error) {
+func Get() (*app.CPUStats, error) {
 	cmd := exec.Command("iostat")
 	res, err := cmd.Output()
 	if err != nil {
@@ -33,7 +34,7 @@ func Get() (*app.CpuStats, error) {
 		return nil, err
 	}
 
-	return &app.CpuStats{
+	return &app.CPUStats{
 		User:   user,
 		System: system,
 		Idle:   idle,

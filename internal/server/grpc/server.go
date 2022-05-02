@@ -4,15 +4,16 @@ package internalgrpc
 
 import (
 	"fmt"
+	"log"
+	"net"
+	"time"
+
 	"github.com/google/uuid"
 	"github.com/vlyagusha/system_stats_daemon/internal/app"
 	"github.com/vlyagusha/system_stats_daemon/internal/config"
 	"github.com/vlyagusha/system_stats_daemon/internal/pipeline"
 	memorystorage "github.com/vlyagusha/system_stats_daemon/internal/storage/memory"
 	"google.golang.org/grpc"
-	"log"
-	"net"
-	"time"
 )
 
 type Server struct {
@@ -93,14 +94,14 @@ func (s Server) FetchResponse(message *RequestMessage, server SystemStatsStreamS
 	responseTicker := time.NewTicker(time.Duration(message.N) * time.Second)
 	go func(storage *memorystorage.Storage) {
 		if message.M > message.N {
-			log.Print("sleep")
+			log.Printf("sleep %d seconds", message.M-message.N)
 			time.Sleep(time.Duration(message.M-message.N) * time.Second)
 		}
 
 		for {
 			select {
 			case <-responseTicker.C:
-				stat, err := storage.FindAvg(message.M)
+				stat, err := storage.FindAvg(time.Duration(message.M))
 				if err != nil {
 					log.Printf("error while getting avg stats: %s", err)
 					collectDone <- true
@@ -143,8 +144,6 @@ func (s Server) FetchResponse(message *RequestMessage, server SystemStatsStreamS
 			}
 		}
 	}(storage)
-
-	storage = nil
 
 	<-done
 	log.Printf("finished fetch response for N = %d and M = %d", message.N, message.M)

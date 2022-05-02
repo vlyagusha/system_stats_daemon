@@ -3,11 +3,12 @@ package main
 import (
 	"context"
 	"flag"
-	"github.com/vlyagusha/system_stats_daemon/internal/config"
-	internalgrpc "github.com/vlyagusha/system_stats_daemon/internal/server/grpc"
 	"log"
 	"os/signal"
 	"syscall"
+
+	"github.com/vlyagusha/system_stats_daemon/internal/config"
+	internalgrpc "github.com/vlyagusha/system_stats_daemon/internal/server/grpc"
 )
 
 var port string
