@@ -12,9 +12,9 @@ import (
 )
 
 func TestStorage(t *testing.T) { //nolint:funlen,gocognit,nolintlint
-	store := New()
-
 	t.Run("saving test", func(t *testing.T) {
+		store := New()
+
 		collectedAt, err := time.Parse("2006-01-02 15:04:05", "2022-05-01 12:00:00")
 		if err != nil {
 			t.FailNow()
@@ -69,6 +69,8 @@ func TestStorage(t *testing.T) { //nolint:funlen,gocognit,nolintlint
 	})
 
 	t.Run("test errors", func(t *testing.T) {
+		store := New()
+
 		collectedAt, err := time.Parse("2006-01-02 15:04:05", "2022-05-01 12:00:00")
 		statID := uuid.New()
 		stat := app.SystemStats{
@@ -105,6 +107,8 @@ func TestStorage(t *testing.T) { //nolint:funlen,gocognit,nolintlint
 	})
 
 	t.Run("test get avg simple", func(t *testing.T) {
+		store := New()
+
 		stats := []app.SystemStats{
 			{
 				ID:          parseUUID(t, "4927aa58-a175-429a-a125-c04765597150"),
@@ -187,6 +191,8 @@ func TestStorage(t *testing.T) { //nolint:funlen,gocognit,nolintlint
 	})
 
 	t.Run("test clear storage", func(t *testing.T) {
+		store := New()
+
 		stats := []app.SystemStats{
 			{
 				ID:          parseUUID(t, "4927aa58-a175-429a-a125-c04765597150"),

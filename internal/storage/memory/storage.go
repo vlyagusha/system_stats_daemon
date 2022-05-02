@@ -62,6 +62,7 @@ func (m *Storage) FindAvg(duration time.Duration) (*app.SystemStatsAvg, error) {
 
 	now := time.Now()
 	var load1, load5, load15, user, system, idle, kbt, tps, mbs float64
+	totalItems := 0.0
 	for _, systemStats := range m.stats {
 		if now.Sub(systemStats.CollectedAt) <= duration {
 			load1 += systemStats.Load.Load1
@@ -73,12 +74,12 @@ func (m *Storage) FindAvg(duration time.Duration) (*app.SystemStatsAvg, error) {
 			kbt += systemStats.Disk.KBt
 			tps += float64(systemStats.Disk.TPS)
 			mbs += systemStats.Disk.MBs
+
+			totalItems++
 		} else {
 			delete(m.stats, systemStats.ID)
 		}
 	}
-
-	totalItems := float64(len(m.stats))
 
 	return &app.SystemStatsAvg{
 		Load1:  load1 / totalItems,
