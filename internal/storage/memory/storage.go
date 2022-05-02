@@ -25,7 +25,7 @@ func (m *Storage) Create(s app.SystemStats) error {
 	defer m.mu.Unlock()
 
 	if _, ok := m.stats[s.ID]; ok {
-		return memorystorage.ErrObjectAlreadyExists
+		return storage.ErrObjectAlreadyExists
 	}
 
 	m.stats[s.ID] = s
@@ -37,7 +37,7 @@ func (m *Storage) Delete(id uuid.UUID) error {
 	defer m.mu.Unlock()
 
 	if _, ok := m.stats[id]; !ok {
-		return memorystorage.ErrObjectDoesNotExist
+		return storage.ErrObjectDoesNotExist
 	}
 
 	delete(m.stats, id)

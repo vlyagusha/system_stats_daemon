@@ -1,7 +1,6 @@
 package memorystorage
 
 import (
-	memorystorage "github.com/vlyagusha/system_stats_daemon/internal/storage"
 	"math"
 	"testing"
 	"time"
@@ -9,10 +8,11 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	"github.com/vlyagusha/system_stats_daemon/internal/app"
+	"github.com/vlyagusha/system_stats_daemon/internal/storage"
 )
 
 func TestStorage(t *testing.T) { //nolint:funlen,gocognit,nolintlint
-	storage := New()
+	store := New()
 
 	t.Run("saving test", func(t *testing.T) {
 		collectedAt, err := time.Parse("2006-01-02 15:04:05", "2022-05-01 12:00:00")
@@ -40,13 +40,13 @@ func TestStorage(t *testing.T) { //nolint:funlen,gocognit,nolintlint
 			},
 		}
 
-		err = storage.Create(stat)
+		err = store.Create(stat)
 		if err != nil {
 			t.FailNow()
 			return
 		}
 
-		saved, err := storage.FindAll()
+		saved, err := store.FindAll()
 		if err != nil {
 			t.FailNow()
 			return
@@ -54,13 +54,13 @@ func TestStorage(t *testing.T) { //nolint:funlen,gocognit,nolintlint
 		require.Len(t, saved, 1)
 		require.Equal(t, stat, saved[0])
 
-		err = storage.Delete(stat.ID)
+		err = store.Delete(stat.ID)
 		if err != nil {
 			t.FailNow()
 			return
 		}
 
-		saved, err = storage.FindAll()
+		saved, err = store.FindAll()
 		if err != nil {
 			t.FailNow()
 			return
@@ -91,17 +91,17 @@ func TestStorage(t *testing.T) { //nolint:funlen,gocognit,nolintlint
 			},
 		}
 
-		err = storage.Create(stat)
+		err = store.Create(stat)
 		require.Nil(t, err)
 
-		err = storage.Create(stat)
-		require.ErrorIs(t, err, memorystorage.ErrObjectAlreadyExists)
+		err = store.Create(stat)
+		require.ErrorIs(t, err, storage.ErrObjectAlreadyExists)
 
-		err = storage.Delete(statID)
+		err = store.Delete(statID)
 		require.Nil(t, err)
 
-		err = storage.Delete(statID)
-		require.ErrorIs(t, err, memorystorage.ErrObjectDoesNotExist)
+		err = store.Delete(statID)
+		require.ErrorIs(t, err, storage.ErrObjectDoesNotExist)
 	})
 
 	t.Run("test get avg simple", func(t *testing.T) {
@@ -166,14 +166,14 @@ func TestStorage(t *testing.T) { //nolint:funlen,gocognit,nolintlint
 		}
 
 		for _, e := range stats {
-			err := storage.Create(e)
+			err := store.Create(e)
 			if err != nil {
 				t.FailNow()
 				return
 			}
 		}
 
-		avg, err := storage.FindAvg(60 * time.Second)
+		avg, err := store.FindAvg(60 * time.Second)
 		require.Nil(t, err)
 		require.Equal(t, math.Round(avg.Load1*100)/100, 1.67)
 		require.Equal(t, math.Round(avg.Load5*100)/100, 10.0)
