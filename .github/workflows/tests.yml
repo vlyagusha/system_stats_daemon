@@ -2,8 +2,8 @@ name: System stat daemon
 
 on:
   push:
-    branches:
-      - *
+  pull_request:
+    types: [opened]
 
 env:
   GO111MODULE: "on"
