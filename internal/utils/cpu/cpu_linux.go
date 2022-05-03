@@ -4,11 +4,10 @@
 package cpu
 
 import (
-	"fmt"
 	"github.com/vlyagusha/system_stats_daemon/internal/app"
-	"runtime"
+	"github.com/vlyagusha/system_stats_daemon/internal/utils"
 )
 
 func Get() (*app.CPUStats, error) {
-	return nil, fmt.Errorf("cpu statistics not implemented for: %s", runtime.GOOS)
+	return nil, utils.ErrNotImplemented
 }

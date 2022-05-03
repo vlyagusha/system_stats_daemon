@@ -16,10 +16,7 @@ func TestStorage(t *testing.T) { //nolint:funlen,gocognit,nolintlint
 		store := New()
 
 		collectedAt, err := time.Parse("2006-01-02 15:04:05", "2022-05-01 12:00:00")
-		if err != nil {
-			t.FailNow()
-			return
-		}
+		require.NoError(t, err)
 		stat := app.SystemStats{
 			ID:          uuid.New(),
 			CollectedAt: collectedAt,
@@ -41,30 +38,18 @@ func TestStorage(t *testing.T) { //nolint:funlen,gocognit,nolintlint
 		}
 
 		err = store.Create(stat)
-		if err != nil {
-			t.FailNow()
-			return
-		}
+		require.NoError(t, err)
 
 		saved, err := store.FindAll()
-		if err != nil {
-			t.FailNow()
-			return
-		}
+		require.NoError(t, err)
 		require.Len(t, saved, 1)
 		require.Equal(t, stat, saved[0])
 
 		err = store.Delete(stat.ID)
-		if err != nil {
-			t.FailNow()
-			return
-		}
+		require.NoError(t, err)
 
 		saved, err = store.FindAll()
-		if err != nil {
-			t.FailNow()
-			return
-		}
+		require.NoError(t, err)
 		require.Len(t, saved, 0)
 	})
 
@@ -72,6 +57,8 @@ func TestStorage(t *testing.T) { //nolint:funlen,gocognit,nolintlint
 		store := New()
 
 		collectedAt, err := time.Parse("2006-01-02 15:04:05", "2022-05-01 12:00:00")
+		require.NoError(t, err)
+
 		statID := uuid.New()
 		stat := app.SystemStats{
 			ID:          statID,
@@ -94,13 +81,13 @@ func TestStorage(t *testing.T) { //nolint:funlen,gocognit,nolintlint
 		}
 
 		err = store.Create(stat)
-		require.Nil(t, err)
+		require.NoError(t, err)
 
 		err = store.Create(stat)
 		require.ErrorIs(t, err, storage.ErrObjectAlreadyExists)
 
 		err = store.Delete(statID)
-		require.Nil(t, err)
+		require.NoError(t, err)
 
 		err = store.Delete(statID)
 		require.ErrorIs(t, err, storage.ErrObjectDoesNotExist)
