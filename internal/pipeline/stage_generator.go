@@ -67,7 +67,7 @@ func stageGenerator(_ string, f func(s app.SystemStats) app.SystemStats) Stage {
 		go func() {
 			defer close(out)
 			for v := range in {
-				out <- f(v)
+				out <- f(v.(app.SystemStats))
 			}
 		}()
 		return out

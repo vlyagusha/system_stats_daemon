@@ -1,11 +1,9 @@
 package pipeline
 
-import "github.com/vlyagusha/system_stats_daemon/internal/app"
-
 type (
-	In  = <-chan app.SystemStats
+	In  = <-chan interface{}
 	Out = In
-	Bi  = chan app.SystemStats
+	Bi  = chan interface{}
 )
 
 type Stage func(in In) (out Out)

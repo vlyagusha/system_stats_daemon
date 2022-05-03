@@ -82,7 +82,7 @@ func (s Server) FetchResponse(message *RequestMessage, server SystemStatsStreamS
 	storage := memorystorage.New()
 	go func(storage *memorystorage.Storage) {
 		for stat := range pipeline.ExecutePipeline(in, nil, stages...) {
-			err := storage.Create(stat)
+			err := storage.Create(stat.(app.SystemStats))
 			log.Printf("stored stat: %s", stat)
 			if err != nil {
 				log.Printf("error while collect stats: %s", err)
