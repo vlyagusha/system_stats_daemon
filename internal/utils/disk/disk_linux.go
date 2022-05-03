@@ -4,11 +4,10 @@
 package disk
 
 import (
-	"fmt"
 	"github.com/vlyagusha/system_stats_daemon/internal/app"
-	"runtime"
+	"github.com/vlyagusha/system_stats_daemon/internal/utils"
 )
 
 func Get() (*app.DiskStats, error) {
-	return nil, fmt.Errorf("disk statistics not implemented for: %s", runtime.GOOS)
+	return nil, utils.ErrNotImplemented
 }

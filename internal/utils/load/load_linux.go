@@ -4,13 +4,14 @@
 package load
 
 import (
-	"github.com/vlyagusha/system_stats_daemon/internal/app"
 	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"syscall"
+
+	"github.com/vlyagusha/system_stats_daemon/internal/app"
 )
 
 func Get() (*app.LoadStats, error) {
