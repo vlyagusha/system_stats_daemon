@@ -101,7 +101,7 @@ func (s Server) FetchResponse(message *RequestMessage, server SystemStatsStreamS
 		for {
 			select {
 			case <-responseTicker.C:
-				stat, err := storage.FindAvg(time.Duration(message.M))
+				stat, err := storage.FindAvg(time.Duration(message.M) * time.Second)
 				if err != nil {
 					log.Printf("error while getting avg stats: %s", err)
 					collectDone <- true
