@@ -18,3 +18,4 @@
 
 bin/
 logs/
+configs/config.yaml
