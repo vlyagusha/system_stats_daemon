@@ -51,7 +51,7 @@ func (s *Server) Start() error {
 }
 
 func (s *Server) Stop() {
-	s.grpcSrv.GracefulStop()
+	s.grpcSrv.Stop()
 }
 
 func (s Server) FetchResponse(message *RequestMessage, server SystemStatsStreamService_FetchResponseServer) error {

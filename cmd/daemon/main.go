@@ -39,8 +39,8 @@ func main() {
 			log.Fatalf("failed to start grpc server: %s", err)
 		}
 	}()
+	defer grpcServer.Stop()
 
 	<-ctx.Done()
 	log.Printf("graceful shutting down")
-	grpcServer.Stop()
 }
