@@ -9,8 +9,9 @@ service SystemStatsStreamService {
 }
 
 message RequestMessage {
-  int32 n = 1;
-  int32 m = 2;
+  string name = 1;
+  int32 n = 2;
+  int32 m = 3;
 }
 
 message ResponseMessage {

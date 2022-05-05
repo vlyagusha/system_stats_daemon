@@ -8,6 +8,7 @@ import (
 	"log"
 	"net"
 
+	"github.com/google/uuid"
 	internalgrpc "github.com/vlyagusha/system_stats_daemon/internal/server/grpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -36,8 +37,9 @@ func main() {
 	client := internalgrpc.NewSystemStatsStreamServiceClient(conn)
 
 	in := &internalgrpc.RequestMessage{
-		N: int32(n),
-		M: int32(m),
+		Name: uuid.New().String(),
+		N:    int32(n),
+		M:    int32(m),
 	}
 
 	stream, err := client.FetchResponse(context.Background(), in)

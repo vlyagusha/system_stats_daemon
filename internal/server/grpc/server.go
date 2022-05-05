@@ -55,7 +55,7 @@ func (s *Server) Stop() {
 }
 
 func (s Server) FetchResponse(message *RequestMessage, server SystemStatsStreamService_FetchResponseServer) error {
-	log.Printf("fetch response for N = %d and M = %d", message.N, message.M)
+	log.Printf("fetch request from client %s for N = %d and M = %d", message.Name, message.N, message.M)
 
 	in := make(pipeline.Bi)
 	done := make(chan bool)
@@ -111,7 +111,7 @@ func (s Server) FetchResponse(message *RequestMessage, server SystemStatsStreamS
 
 				log.Printf("got avg stat %s", stat)
 				resp := ResponseMessage{
-					Title:       fmt.Sprintf("Request for N = %d and M = %d: %s", message.N, message.M, stat),
+					Title:       fmt.Sprintf("Response from client %s processed: %s", message.Name, stat),
 					CollectedAt: time.Now().String(),
 					Load: &LoadMessage{
 						Load1:  float32(stat.Load1),
@@ -139,14 +139,13 @@ func (s Server) FetchResponse(message *RequestMessage, server SystemStatsStreamS
 				log.Printf("finishing request number")
 
 			case <-done:
-				log.Printf("finished fetch response for N = %d and M = %d", message.N, message.M)
 				return
 			}
 		}
 	}(storage)
 
 	<-done
-	log.Printf("finished fetch response for N = %d and M = %d", message.N, message.M)
+	log.Printf("finished fetch response from client %s", message.Name)
 
 	return nil
 }

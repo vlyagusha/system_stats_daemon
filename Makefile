@@ -18,7 +18,7 @@ run_client: build_client
 	$(BIN_CLIENT)
 
 test:
-	go test -race -count 100 ./internal/...
+	go test -race -count 10 ./internal/...
 
 install-lint-deps:
 	(which golangci-lint > /dev/null) || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.41.1
